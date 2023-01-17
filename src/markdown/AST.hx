@@ -63,8 +63,16 @@ class ElementNode implements Node {
 
 	public function accept(visitor:NodeVisitor):Void {
 		if (visitor.visitElementBefore(this)) {
-			for (child in children)
-				child.accept(visitor);
+			switch this.tag {
+				case "h1", "h2", "h3", "h4", "h5", "h6" if (children.length == 1 && (children[0] is TextNode)):
+					final text = cast(children[0], TextNode).text;
+					var link = text.toLowerCase();
+					link = StringTools.replace(link, " ", "-");
+					visitor.visitText(new TextNode('<a name="$link">$text</a>'));
+				default:
+					for (child in children)
+						child.accept(visitor);
+			}
 			visitor.visitElementAfter(this);
 		}
 	}
